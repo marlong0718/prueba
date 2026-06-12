@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Simulador Green Belt v6</title>
+<style>
+html,body{margin:0;height:100%;background:#eef5f0}iframe{border:0;width:100%;height:100vh;display:block}.loading{font-family:Arial,Helvetica,sans-serif;color:#132033;padding:18px}
+</style>
+</head>
+<body>
+<div id="loading" class="loading">Cargando simulador Green Belt v6...</div>
+<iframe id="sim" src="./v5.html" style="display:none"></iframe>
+<script>
+(function(){
+  var iframe=document.getElementById('sim');
+  iframe.onload=function(){
+    var w=iframe.contentWindow;
+    var d=iframe.contentDocument || w.document;
+    function add(topic,q,opts,correct,why,how){
+      w.bank.push({topic:topic,q:q,opts:opts,correct:correct,why:why,how:how});
+    }
+    function findText(text){
+      for(var i=0;i<w.bank.length;i++){
+        if(w.bank[i].q && w.bank[i].q.indexOf(text)>=0){return w.bank[i];}
+      }
+      return null;
+    }
+    var t=d.querySelector('.title');
+    if(t){t.innerHTML='Simulador Green Belt v6';}
+    var tag=d.querySelector('#intro .tag');
+    if(tag){tag.innerHTML='Lean Six Sigma · Green Belt · v6 ajustes puntuales';}
+    var intro=d.querySelector('#intro ul');
+    if(intro){
+      intro.innerHTML='<li>Se corrigió Cpk con fórmula completa.</li><li>Se precisó Ley de Little como Lead Time = WIP / Throughput.</li><li>Se agregó Pp/Ppk vs Cp/Cpk.</li><li>Se agregó DOE básico: factores, niveles e interacción.</li><li>Se agregó Gauge R&amp;R con criterio de aceptación.</li><li>No guarda nombres, correos ni respuestas.</li>';
+    }
+    var little=findText('Ley de Little');
+    if(little){
+      little.q='¿Cuál es la forma más útil de la Ley de Little para analizar velocidad de proceso?';
+      little.opts=['Lead Time = WIP / Throughput','Cp = (USL - LSL) / 6σ','DPMO = defectos / oportunidades x 1,000,000','FPY = unidades buenas / unidades totales'];
+      little.correct='Lead Time = WIP / Throughput';
+      little.why='La Ley de Little relaciona trabajo en proceso, tasa de salida y tiempo de entrega. En mejora de procesos se usa comúnmente como Lead Time = WIP / Throughput.';
+      little.how='Si la pregunta menciona WIP, Lead Time o Throughput, no pensés en capacidad ni defectos. Aplicá la relación exacta: Lead Time = WIP dividido entre Throughput. También puede verse como L = λW, donde L es WIP, λ es throughput y W es lead time.';
+    }
+    var cpk=findText('LSL=0, USL=10, media=4');
+    if(cpk){
+      cpk.why='Cpk = min[(USL - μ)/(3σ), (μ - LSL)/(3σ)]. Con USL=10, LSL=0, μ=4 y σ=1: lado superior = (10-4)/(3x1)=2.00; lado inferior = (4-0)/(3x1)=1.33. Se toma el menor: 1.33.';
+      cpk.how='Para Cpk nunca usés solo el ancho total. Calculá ambos lados con denominador 3σ y elegí el menor. La pista de examen es que te dan media además de USL, LSL y sigma.';
+    }
+    add('Capacidad del proceso','¿Cuál es la fórmula completa de Cpk?',['Cpk = min[(USL - μ)/(3σ), (μ - LSL)/(3σ)]','Cpk = (USL - LSL)/(6σ)','Cpk = defectos / oportunidades x 1,000,000','Cpk = tiempo disponible / demanda'],'Cpk = min[(USL - μ)/(3σ), (μ - LSL)/(3σ)]','Cpk mide capacidad considerando el centrado del proceso. Por eso compara la media contra ambos límites de especificación.','Si aparece Cpk, buscá USL, LSL, media y sigma. Calculá el lado superior y el inferior con 3σ, y escogé el menor. Si no aparece media, probablemente es Cp, no Cpk.');
+    add('Capacidad del proceso','¿Qué diferencia principal hay entre Cp/Cpk y Pp/Ppk?',['Cp/Cpk usan sigma dentro o corto plazo; Pp/Ppk usan sigma total o largo plazo','Cp/Cpk son para atributos y Pp/Ppk para conteos','Pp/Ppk siempre sustituyen gráficos de control','No existe diferencia práctica'],'Cp/Cpk usan sigma dentro o corto plazo; Pp/Ppk usan sigma total o largo plazo','Cp y Cpk evalúan capacidad potencial usando variación dentro del proceso. Pp y Ppk evalúan desempeño usando variación total observada.','La pista es la palabra capacidad vs desempeño. Si el examen dice within, corto plazo o sigma dentro, pensá Cp/Cpk. Si dice overall, largo plazo o sigma total, pensá Pp/Ppk.');
+    add('Capacidad del proceso','Si un examen pregunta por índice de desempeño usando variación total del proceso, ¿cuál corresponde?',['Pp o Ppk','Cp o Cpk','DPMO únicamente','RTY únicamente'],'Pp o Ppk','Pp y Ppk son índices de desempeño porque usan la variación total observada del proceso.','Si ves desempeño, overall, total o largo plazo, escogé Pp/Ppk. Si ves capacidad potencial o within, escogé Cp/Cpk.');
+    add('DOE','¿Qué es un factor en diseño de experimentos DOE?',['Una variable de entrada que se manipula o estudia','La respuesta final Y únicamente','Un gráfico de control','Un documento de cierre'],'Una variable de entrada que se manipula o estudia','En DOE, un factor es una X que podría influir en la respuesta Y.','Si la pregunta habla de temperatura, presión, tiempo, método o cualquier X que se cambia deliberadamente, eso es un factor.');
+    add('DOE','¿Qué es un nivel en DOE?',['Un valor o condición específica de un factor','La cantidad de defectos totales','La fase Controlar','El tamaño del equipo'],'Un valor o condición específica de un factor','Los niveles son los valores que toma un factor durante el experimento.','Si el factor es temperatura, niveles podrían ser 80°C y 100°C. Factor es la variable; nivel es el valor probado.');
+    add('DOE','¿Qué significa interacción entre factores en DOE?',['El efecto de un factor cambia dependiendo del nivel de otro factor','Los factores no tienen relación con Y','Todos los factores tienen el mismo efecto siempre','La muestra está mal tomada'],'El efecto de un factor cambia dependiendo del nivel de otro factor','Una interacción ocurre cuando el impacto de una X depende de otra X.','En examen, si la combinación de dos factores produce un resultado distinto al esperado por sus efectos separados, la palabra clave es interacción.');
+    add('DOE','¿Para qué sirve un diseño factorial básico?',['Estudiar varios factores y sus interacciones al mismo tiempo','Evitar recolectar datos','Sustituir el Project Charter','Calcular únicamente takt time'],'Estudiar varios factores y sus interacciones al mismo tiempo','El diseño factorial permite evaluar más de una X y detectar interacciones.','Si la pregunta menciona factores, niveles y combinaciones experimentales, pensá en diseño factorial. No lo confundás con una prueba de hipótesis aislada.');
+    add('MSA','¿Cuál criterio típico interpreta %Gauge R&R menor a 10%?',['Sistema de medición generalmente aceptable o excelente','Sistema inaceptable','No se puede interpretar','Proceso fuera de control'],'Sistema de medición generalmente aceptable o excelente','Un %R&R menor a 10% suele indicar que la variación del sistema de medición es pequeña respecto a la variación total o tolerancia.','Regla práctica de examen: menor a 10% es bueno; entre 10% y 30% puede aceptarse según contexto; mayor a 30% suele ser inaceptable.');
+    add('MSA','¿Cómo se interpreta un %Gauge R&R entre 10% y 30%?',['Aceptable de forma condicional según criticidad, costo y uso de la medición','Siempre excelente','Siempre inaceptable sin revisión','No pertenece a MSA'],'Aceptable de forma condicional según criticidad, costo y uso de la medición','Entre 10% y 30% el sistema puede usarse si el riesgo es razonable o si mejorar la medición es costoso.','Si el rango cae entre 10 y 30, no elijás automáticamente excelente ni inaceptable. La palabra correcta suele ser condicional o depende del uso.');
+    add('MSA','¿Qué indica un %Gauge R&R mayor a 30%?',['Sistema de medición normalmente inaceptable','Sistema perfecto','Proceso con Cpk alto','Mejora rápida completada'],'Sistema de medición normalmente inaceptable','Un %R&R mayor a 30% significa que demasiada variación proviene del sistema de medición.','En examen, más de 30% es señal roja: hay que mejorar el método, instrumento, capacitación o definición de medición antes de confiar en los datos.');
+    var size=d.getElementById('bankSize');
+    if(size){size.innerHTML=w.bank.length;}
+    document.getElementById('loading').style.display='none';
+    iframe.style.display='block';
+  };
+})();
+</script>
+</body>
+</html>
